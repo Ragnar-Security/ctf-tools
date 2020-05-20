@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# Author: WittsEnd2
+# Contributors: 
 from scapy.all import *
 
 def packet_callback(packet):

@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+# Author: WittsEnd2
+# Contributors: 
+
 import angr
 import claripy
 

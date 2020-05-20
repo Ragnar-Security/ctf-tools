@@ -1,3 +1,7 @@
+#!/usr/bin/env python3
+# Author: WittsEnd2
+# Contributors: 
+
 from urllib.request import *
 from urllib.parse import *
 import http
