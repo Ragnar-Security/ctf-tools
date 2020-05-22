@@ -9,4 +9,3 @@ edition = "2018"
 [dependencies]
 
 pcap-file = "1.1.1"
-pcap-parser = "0.9.2"
