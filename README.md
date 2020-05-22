@@ -8,15 +8,13 @@ These are tools that are designed for specific set of CTF Chalenges/Cyber Securi
 
   - For python-like code
 ```python
-#Author: Name
-#Contributors: Name1, Name2 (leave blank if no additional contributors)
+# Authors: Name1, Name2, etc
 ```
 
-For C-Like Code
+  - For C-Like Code
 ```C
 /**
-  * Author: Name
-  * Contributors: Name1, Name2 (leave blank if no additional contributors)
+  * Authors: Name1, Name2, etc
   */ 
 ```
 
