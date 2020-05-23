@@ -1,14 +1,20 @@
 // use pcap_parser::*;
 // use pcap_parser::traits::PcapReaderIterator;
+
+mod actions;
 use pcap_file::pcap::PcapReader;
 use pcap_file::pcapng::PcapNgReader;
 use std::fs::File;
 use std::env;
 
+/**
+ *  Driver code for pcap_analyzer
+ */
 fn main() {
     let args: Vec<String> = env::args().collect();
     let file_path = &args[1];
     let extension = get_extension_from_filename(file_path);
+    println!("{:?}", extension);
     if extension.eq("pcap") {
 
         let file_in = File::open(file_path).expect("Error opening file"); 
@@ -17,8 +23,9 @@ fn main() {
     
         for pcap in pcap_reader {
             let pcap = pcap.unwrap();
-            let pcap_header = pcap.header;
-            println!("{:?}", pcap_header);
+            println!("{:?}", pcap);
+            let src_ip = actions::src_ip(pcap);
+            println!("{:?}", src_ip);
         }
     } else if extension.eq("pcapng") {
         let file_in = File::open(file_path).expect("Error opening file"); 
@@ -30,15 +37,18 @@ fn main() {
             let parsed_block = block.parsed().unwrap();
         }
     }
-
 }
 
+
+
+
+
+
 fn get_extension_from_filename(filename: &str) -> &str{
-    let mut position = 1; 
-    if filename.chars().nth(0) == Some('.') {
-        position = 2;
-    }
+    let position = filename.matches(".").count(); 
     let split_string:Vec<&str> = filename.split(".").collect();
     let extension = split_string[position];
     return extension;
 }
+
+
