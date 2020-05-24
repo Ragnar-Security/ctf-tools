@@ -1,7 +1,7 @@
 // use pcap_parser::*;
 // use pcap_parser::traits::PcapReaderIterator;
 
-mod actions;
+mod pcap_functions;
 use pcap_file::pcap::PcapReader;
 use pcap_file::pcapng::PcapNgReader;
 use std::fs::File;
@@ -24,7 +24,7 @@ fn main() {
         for pcap in pcap_reader {
             let pcap = pcap.unwrap();
             println!("{:?}", pcap);
-            let src_ip = actions::src_ip(pcap);
+            let src_ip = pcap_functions::src_ip(&pcap);
             println!("{:?}", src_ip);
         }
     } else if extension.eq("pcapng") {
@@ -38,12 +38,6 @@ fn main() {
         }
     }
 }
-
-
-
-
-
-
 fn get_extension_from_filename(filename: &str) -> &str{
     let position = filename.matches(".").count(); 
     let split_string:Vec<&str> = filename.split(".").collect();
