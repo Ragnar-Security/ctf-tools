@@ -31,6 +31,13 @@ impl Error for PacketTypeError {
     }
 }
 
+struct PacketData {
+    ethernet_header: Vec<u8>,
+    ip_header: Vec<u8>,
+    low_level_header: Vec<u8>,
+    data: Vec<u8>
+}
+
 /**
  * Finds the SRC IP_Addr for the packet
  */
@@ -115,16 +122,39 @@ pub fn ip_type (packet: &Packet) -> i32 {
     return return_value;
 } 
 
+fn low_level_packet_type(packet: &Packet) -> u32 {
+    
+    return 0;
+}
+
 fn split_packet(packet: &Packet) -> Result<(), PacketTypeError>{
     let data = &packet.data; 
     let data_type = ip_type(&packet); 
-    let mut ethernet:Vec<u8> = Vec::new();
-    let mut ip_header:Vec<u8> = Vec::new();
-    let mut tcp_header:Vec<u8> = Vec::new(); 
-    let mut tcp_data:Vec<u8> = Vec::new(); 
+
     if (data_type == -1) {
         return Err(PacketTypeError::new("Invalid Packet Type"));
     } else {
+        let mut packet:PacketData = PacketData {
+            ethernet_header: Vec::new(),
+            ip_header: Vec::new(),
+            low_level_header: Vec::new(),
+            data: Vec::new(),
+        };
+        let mut counter = 0;
+        for &i in data.iter(){
+            if counter < 13 { 
+                packet.ethernet_header.push(i);
+            }
+            if counter < 33 {
+                packet.ip_header.push(i);
+            }
+            match data_type {
+                0 => {
+                    
+                },
+                
+            }
+        }
         return Ok(());
     }
 }
