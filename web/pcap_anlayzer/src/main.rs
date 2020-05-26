@@ -2,6 +2,7 @@
 // use pcap_parser::traits::PcapReaderIterator;
 
 mod pcap_functions;
+mod packet_functions; 
 use pcap_file::pcap::PcapReader;
 use pcap_file::pcapng::PcapNgReader;
 use std::fs::File;
