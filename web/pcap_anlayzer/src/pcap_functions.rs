@@ -120,12 +120,9 @@ pub fn ip_type (packet: &Packet) -> i32 {
 
     }
     return return_value;
-} 
-
-fn low_level_packet_type(packet: &Packet) -> u32 {
-    
-    return 0;
 }
+
+
 
 fn split_packet(packet: &Packet) -> Result<(), PacketTypeError>{
     let data = &packet.data; 
@@ -147,12 +144,6 @@ fn split_packet(packet: &Packet) -> Result<(), PacketTypeError>{
             }
             if counter < 33 {
                 packet.ip_header.push(i);
-            }
-            match data_type {
-                0 => {
-                    
-                },
-                
             }
         }
         return Ok(());
