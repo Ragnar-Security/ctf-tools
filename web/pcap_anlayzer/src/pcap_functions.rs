@@ -88,48 +88,50 @@ pub fn dest_ip (packet: &Packet) -> String{
 
 
 
-fn split_packet(packet: &Packet) -> Result<(), PacketTypeError>{
+pub fn split_packet(packet: &Packet) { //-> Result<(), PacketTypeError>{
     let data = &packet.data; 
-    // if (data_type == -1) {
-    //     return Err(PacketTypeError::new("Invalid Packet Type"));
-    // } else {
+
+    let packet_data = packet_functions::parse_headers(data, false);
+
+    println!("{:?}", packet_data);
+
 
     
-        let mut split_packet:PacketData = PacketData {
-            ethernet_header: Vec::new(),
-            ip_header: Vec::new(),
-            low_level_header: Vec::new(),
-            data: Vec::new(),
-        };
+        // let mut split_packet:PacketData = PacketData {
+        //     ethernet_header: Vec::new(),
+        //     ip_header: Vec::new(),
+        //     low_level_header: Vec::new(),
+        //     data: Vec::new(),
+        // };
         
         
-        let mut ip_type_bytes = Vec::new();
-        for i in 0..13{
-            if i < 13 { 
-                split_packet.ethernet_header.push(data[i]);
-                if i == 12 || i == 13 {
-                    ip_type_bytes.push(data[i]); 
-                }
-            }            
-        }
-        let ip_type = packet_functions::ip_type(ip_type_bytes); 
-        if ip_type != -1 {
-            return Err(PacketTypeError::new("Invalid Packet Type"));
-        }
+        // let mut ip_type_bytes = Vec::new();
+        // for i in 0..13{
+        //     if i < 13 { 
+        //         split_packet.ethernet_header.push(data[i]);
+        //         if i == 12 || i == 13 {
+        //             ip_type_bytes.push(data[i]); 
+        //         }
+        //     }            
+        // }
+        // let ip_type = packet_functions::ip_type(ip_type_bytes); 
+        // if ip_type != -1 {
+        //     return Err(PacketTypeError::new("Invalid Packet Type"));
+        // }
         
-        for i in 13..33 {
-            split_packet.ip_header.push(data[i]);
-        }
-        let protocol_type = packet_functions::protocol_type(&split_packet.ip_header); 
-        if protocol_type == 6 {
-            data = packet_functions::read_tcp(packet, split_packet.data);
-        } else if protocol_type == 17 {
-            data = packet_functions::read_udp(packet);
-        } else {
-            println!("Unsupported packet reading format");
-            return Err(PacketTypeError::new("Unsupported packet reading format"));
-        }
+        // for i in 13..33 {
+        //     split_packet.ip_header.push(data[i]);
+        // }
+        // let protocol_type = packet_functions::protocol_type(&split_packet.ip_header); 
+        // if protocol_type == 6 {
+        //     data = packet_functions::read_tcp(packet, split_packet.data);
+        // } else if protocol_type == 17 {
+        //     data = packet_functions::read_udp(packet);
+        // } else {
+        //     println!("Unsupported packet reading format");
+        //     return Err(PacketTypeError::new("Unsupported packet reading format"));
+        // }
 
-        return Ok(());
+        // return Ok(());
     // }
 }

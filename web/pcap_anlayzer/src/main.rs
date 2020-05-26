@@ -16,16 +16,18 @@ fn main() {
     let file_path = &args[1];
     let extension = get_extension_from_filename(file_path);
     println!("{:?}", extension);
-    if extension.eq("pcap") {
 
+    if extension.eq("pcap") {
+        
         let file_in = File::open(file_path).expect("Error opening file"); 
-    
+        
         let pcap_reader = PcapReader::new(file_in).unwrap();
-    
+        
         for pcap in pcap_reader {
             let pcap = pcap.unwrap();
             println!("{:?}", pcap);
             let src_ip = pcap_functions::src_ip(&pcap);
+            pcap_functions::split_packet(&pcap);
             println!("{:?}", src_ip);
         }
     } else if extension.eq("pcapng") {

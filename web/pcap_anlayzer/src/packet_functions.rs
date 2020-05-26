@@ -36,3 +36,18 @@ pub fn ip_type (ethernet_header: Vec<u8>) -> i32 {
 pub fn protocol_type(ip_header: &Vec<u8>) -> u8 {
     return ip_header[10];
 }
+
+pub fn get_slice(data:&[u8], from_ip:bool) -> Result<etherparse::SlicedPacket, etherparse::ReadError> {
+    if from_ip == false {
+        return etherparse::SlicedPacket::from_ethernet(data); 
+    } else {
+        return etherparse::SlicedPacket::from_ip(data); 
+    }
+}
+pub fn parse_headers(data:&[u8], from_ip:bool) -> Result<etherparse::PacketHeaders, etherparse::ReadError> {
+    if from_ip == false {
+        return etherparse::PacketHeaders::from_ethernet_slice(data); 
+    } else {
+        return etherparse::PacketHeaders::from_ip_slice(data);
+    }
+}
