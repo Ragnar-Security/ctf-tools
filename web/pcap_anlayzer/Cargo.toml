@@ -9,3 +9,4 @@ edition = "2018"
 [dependencies]
 
 pcap-file = "1.1.1"
+etherparse = "0.9.0"
