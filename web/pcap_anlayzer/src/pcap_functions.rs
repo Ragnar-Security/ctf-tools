@@ -86,52 +86,34 @@ pub fn dest_ip (packet: &Packet) -> String{
     return ret_str; 
 }
 
-
-
-pub fn split_packet(packet: &Packet) { //-> Result<(), PacketTypeError>{
-    let data = &packet.data; 
-
-    let packet_data = packet_functions::parse_headers(data, false);
-
-    println!("{:?}", packet_data);
-
-
-    
-        // let mut split_packet:PacketData = PacketData {
-        //     ethernet_header: Vec::new(),
-        //     ip_header: Vec::new(),
-        //     low_level_header: Vec::new(),
-        //     data: Vec::new(),
-        // };
-        
-        
-        // let mut ip_type_bytes = Vec::new();
-        // for i in 0..13{
-        //     if i < 13 { 
-        //         split_packet.ethernet_header.push(data[i]);
-        //         if i == 12 || i == 13 {
-        //             ip_type_bytes.push(data[i]); 
-        //         }
-        //     }            
-        // }
-        // let ip_type = packet_functions::ip_type(ip_type_bytes); 
-        // if ip_type != -1 {
-        //     return Err(PacketTypeError::new("Invalid Packet Type"));
-        // }
-        
-        // for i in 13..33 {
-        //     split_packet.ip_header.push(data[i]);
-        // }
-        // let protocol_type = packet_functions::protocol_type(&split_packet.ip_header); 
-        // if protocol_type == 6 {
-        //     data = packet_functions::read_tcp(packet, split_packet.data);
-        // } else if protocol_type == 17 {
-        //     data = packet_functions::read_udp(packet);
-        // } else {
-        //     println!("Unsupported packet reading format");
-        //     return Err(PacketTypeError::new("Unsupported packet reading format"));
-        // }
-
-        // return Ok(());
-    // }
+pub fn get_transport_data(packet: &Packet) -> std::option::Option<etherparse::TransportHeader>{
+    let data = &packet.data;
+    let packet_data = packet_functions::parse_headers(data, false).unwrap();
+    let transport_layer = packet_data.transport;
+    return transport_layer;
 }
+
+pub fn get_ip_data (packet: &Packet) -> std::option::Option<etherparse::IpHeader> {
+    let data = &packet.data;
+    let packet_data = packet_functions::parse_headers(data, false).unwrap();
+    let ip_layer = packet_data.ip;
+    return ip_layer
+}
+
+pub fn get_link_data (packet: &Packet) -> std::option::Option<etherparse::Ethernet2Header> {
+    let data = &packet.data;
+    let packet_data = packet_functions::parse_headers(data, false).unwrap();
+    let link_layer = packet_data.link;
+    return link_layer;
+}
+
+
+// pub fn split_packet(packet: &Packet) -> std::result::Result<etherparse::PacketHeaders<'_>, etherparse::ReadError>{
+//     let data = &packet.data; 
+
+//     let packet_data = packet_functions::parse_headers(data, false);
+
+//     println!("{:?}", packet_data);
+
+//     return packet_data;
+// }

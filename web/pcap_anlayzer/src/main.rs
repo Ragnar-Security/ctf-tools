@@ -25,16 +25,12 @@ fn main() {
         
         for pcap in pcap_reader {
             let pcap = pcap.unwrap();
-            println!("{:?}", pcap);
             let src_ip = pcap_functions::src_ip(&pcap);
-            pcap_functions::split_packet(&pcap);
-            println!("{:?}", src_ip);
+            pcap_functions::get_transport_data(&pcap);
         }
     } else if extension.eq("pcapng") {
         let file_in = File::open(file_path).expect("Error opening file"); 
-        
         let pcapng_reader = PcapNgReader::new(file_in).unwrap();
-        
         for block in pcapng_reader {
             let block = block.unwrap();
             let parsed_block = block.parsed().unwrap();
