@@ -7,29 +7,57 @@ use pcap_file::pcap::PcapReader;
 use pcap_file::pcapng::PcapNgReader;
 use std::fs::File;
 use std::env;
+extern crate clap;
+use clap::{Arg,App};
 
 /**
  *  Driver code for pcap_analyzer
  */
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    let file_path = &args[1];
-    let extension = get_extension_from_filename(file_path);
-    println!("{:?}", extension);
+    let matches = App::new("pcap_analyzer")
+                        .version("1.0")
+                        .author("WittsEnd2 <contact@ragnarsecurity.com>")
+                        .arg(Arg::with_name("file")
+                            .help("PCAP or PCAPNG file to process")
+                            .required(true)
+                            .index(1))
+                        .arg(Arg::with_name("transport_dump")
+                            .short("td")
+                            .long("transport_dump")
+                            .takes_value(false)
+                            .help("Prints all transport layer packets it receives"))
+                        .arg(Arg::with_name("transport_info")
+                            .short("ti")
+                            .long("transport_info")
+                            .takes_value(false)
+                            .help("Prints out metadata regarding the transport layer"))
+                        .get_matches();
 
-    if extension.eq("pcap") {
-        
-        let file_in = File::open(file_path).expect("Error opening file"); 
-        
+    let file_path = matches.value_of("file").unwrap();
+    println!("Analyzing pcap/pcapng file {}", file_path); 
+
+    let extension = get_extension_from_filename(file_path); 
+    println!("{:?}", extension);
+    let file_in = File::open(file_path).expect("Error opening file"); 
+    if matches.occurrences_of("transport_dump") > 0 {
+        transport_dump(file_in, extension)
+    }
+    if matches.occurrences_of("transport_info") > 0 {
+        transport_info(file_in, extension);
+    }
+
+}
+
+fn transport_dump(file_in:std::fs::File, extension:&str) {
+    if extension.eq("pcap") {        
         let pcap_reader = PcapReader::new(file_in).unwrap();
-        
+            
         for pcap in pcap_reader {
             let pcap = pcap.unwrap();
             let src_ip = pcap_functions::src_ip(&pcap);
-            pcap_functions::get_transport_data(&pcap);
+            println!("{:?}", pcap_functions::get_transport_data(&pcap));
         }
     } else if extension.eq("pcapng") {
-        let file_in = File::open(file_path).expect("Error opening file"); 
         let pcapng_reader = PcapNgReader::new(file_in).unwrap();
         for block in pcapng_reader {
             let block = block.unwrap();
@@ -37,6 +65,19 @@ fn main() {
         }
     }
 }
+
+fn transport_info(file_in:std::fs::File, extension:&str) {
+    if extension.eq("pcap") {
+        let pcap_reader = PcapReader::new(file_in).unwrap();
+        
+    } else if extension.eq("pcapng") {
+        let pcapng_reader = PcapNgReader::new(file_in). unwrap();
+    }
+}
+
+/** 
+ * Retrieves the extension of the file found 
+ */
 fn get_extension_from_filename(filename: &str) -> &str{
     let position = filename.matches(".").count(); 
     let split_string:Vec<&str> = filename.split(".").collect();

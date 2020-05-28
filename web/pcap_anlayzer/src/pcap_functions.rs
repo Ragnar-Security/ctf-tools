@@ -10,34 +10,18 @@ use std::error::Error;
 /**=[[V -PFG;]]
  * Currently we are assuming that we are either looking at TCP/UDP packets.
  */
-#[derive(Debug)]
-struct PacketTypeError {
-    details: String
+
+struct TransportMetadata {
+    ports: Vec<u16>,
+    sequence_nums: u32, 
+    num_ports: u32, 
+    num_protocols: u32,
+    protocols: Vec<String>, 
 }
 
-impl PacketTypeError {
-    fn new(msg: &str) -> PacketTypeError {
-       return PacketTypeError{details: msg.to_string()}; 
-    }
-}
-
-impl fmt::Display for PacketTypeError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f,"{}",self.details)
-    }
-}
-
-impl Error for PacketTypeError {
-    fn description(&self) -> &str {
-        return &self.details;
-    }
-}
-
-struct PacketData {
-    ethernet_header: Vec<u8>,
-    ip_header: Vec<u8>,
-    low_level_header: Vec<u8>,
-    data: Vec<u8>
+struct IpMetadata {
+    ips: Vec<String>, 
+    num_ips: u32
 }
 
 /**
@@ -107,7 +91,25 @@ pub fn get_link_data (packet: &Packet) -> std::option::Option<etherparse::Ethern
     return link_layer;
 }
 
+pub fn transport_metadata(reader: PcapReader<std::fs::File>) {
+    let mut transport_metadata = TransportMetadata {
+        ports: Vec::new(),
+        sequence_nums: 0, 
+        num_protocols: 0,
+        num_ports: 0, 
+        protocols: Vec::new(),
 
+    };
+    for pcap in reader {
+        let pcap = pcap.unwrap();
+        let transprot_data = get_transport_data(&pcap);
+        
+    
+        
+
+
+    }
+}
 // pub fn split_packet(packet: &Packet) -> std::result::Result<etherparse::PacketHeaders<'_>, etherparse::ReadError>{
 //     let data = &packet.data; 
 
