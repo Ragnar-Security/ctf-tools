@@ -22,15 +22,20 @@ fn main() {
                             .required(true)
                             .index(1))
                         .arg(Arg::with_name("transport_dump")
-                            .short("td")
+                            .short("d")
                             .long("transport_dump")
                             .takes_value(false)
                             .help("Prints all transport layer packets it receives"))
                         .arg(Arg::with_name("transport_info")
-                            .short("ti")
+                            .short("t")
                             .long("transport_info")
                             .takes_value(false)
                             .help("Prints out metadata regarding the transport layer"))
+                        .arg(Arg::with_name("ip_info")
+                            .short("i")
+                            .long("ip_header_info")
+                            .takes_value(false)
+                            .help("Prints all of the metadata for the ip headers in the packet"))
                         .get_matches();
 
     let file_path = matches.value_of("file").unwrap();
@@ -40,15 +45,18 @@ fn main() {
     println!("{:?}", extension);
     let file_in = File::open(file_path).expect("Error opening file"); 
     if matches.occurrences_of("transport_dump") > 0 {
-        transport_dump(file_in, extension)
+        transport_dump(&file_in, extension)
     }
     if matches.occurrences_of("transport_info") > 0 {
-        transport_info(file_in, extension);
+        transport_info(&file_in, extension);
+    }
+    if matches.occurrences_of("ip_info") > 0 {
+        ip_info(&file_in, extension);
     }
 
 }
 
-fn transport_dump(file_in:std::fs::File, extension:&str) {
+fn transport_dump(file_in:&std::fs::File, extension:&str) {
     if extension.eq("pcap") {        
         let pcap_reader = PcapReader::new(file_in).unwrap();
             
@@ -66,9 +74,20 @@ fn transport_dump(file_in:std::fs::File, extension:&str) {
     }
 }
 
-fn transport_info(file_in:std::fs::File, extension:&str) {
+fn transport_info(file_in:&std::fs::File, extension:&str) {
     if extension.eq("pcap") {
         let pcap_reader = PcapReader::new(file_in).unwrap();
+        pcap_functions::transport_metadata(pcap_reader);         
+    } else if extension.eq("pcapng") {
+        let pcapng_reader = PcapNgReader::new(file_in). unwrap();
+    }
+}
+
+fn ip_info(file_in:&std::fs::File, extension:&str) {
+    if extension.eq("pcap") {
+        let pcap_reader = PcapReader::new(file_in).unwrap();
+        let ip_meta_data = pcap_functions::ip_metadata(pcap_reader);
+        println!("{:?}", ip_meta_data); 
         
     } else if extension.eq("pcapng") {
         let pcapng_reader = PcapNgReader::new(file_in). unwrap();
