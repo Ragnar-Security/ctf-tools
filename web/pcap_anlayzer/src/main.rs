@@ -31,6 +31,10 @@ fn main() {
                             .long("transport_info")
                             .takes_value(false)
                             .help("Prints out metadata regarding the transport layer"))
+                        .arg(Arg::with_name("ip_dump")
+                            .long("ip_dump")
+                            .takes_value(false)
+                            .help("Prints all IP layer packets it receives"))
                         .arg(Arg::with_name("ip_info")
                             .short("i")
                             .long("ip_header_info")
@@ -88,7 +92,6 @@ fn ip_info(file_in:&std::fs::File, extension:&str) {
         let pcap_reader = PcapReader::new(file_in).unwrap();
         let ip_meta_data = pcap_functions::ip_metadata(pcap_reader);
         println!("{:?}", ip_meta_data); 
-        
     } else if extension.eq("pcapng") {
         let pcapng_reader = PcapNgReader::new(file_in). unwrap();
     }
