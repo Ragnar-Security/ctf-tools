@@ -40,6 +40,11 @@ fn main() {
                             .long("ip_header_info")
                             .takes_value(false)
                             .help("Prints all of the metadata for the ip headers in the packet"))
+                        .arg(Arg::with_name("link_dump")
+                            .short("l")
+                            .long("link_dump")
+                            .takes_value(false)
+                            .help("Dumps all packets at the link layer (ethernet)."))
                         .get_matches();
 
     let file_path = matches.value_of("file").unwrap();
@@ -50,6 +55,9 @@ fn main() {
     let file_in = File::open(file_path).expect("Error opening file"); 
     if matches.occurrences_of("transport_dump") > 0 {
         transport_dump(&file_in, extension)
+    }
+    if matches.occurrences_of("ip_dump") > 0 {
+        ip_dump(&file_in, extension);
     }
     if matches.occurrences_of("transport_info") > 0 {
         transport_info(&file_in, extension);
@@ -93,10 +101,28 @@ fn ip_info(file_in:&std::fs::File, extension:&str) {
         let ip_meta_data = pcap_functions::ip_metadata(pcap_reader);
         println!("{:?}", ip_meta_data); 
     } else if extension.eq("pcapng") {
-        let pcapng_reader = PcapNgReader::new(file_in). unwrap();
+        let pcapng_reader = PcapNgReader::new(file_in).unwrap();
     }
 }
 
+fn ip_dump(file_in:&std::fs::File, extension:&str) {
+    if extension.eq("pcap") {
+        let pcap_reader = PcapReader::new(file_in).unwrap();
+        pcap_functions::ip_dump(pcap_reader);
+    } else if extension.eq("pcapng") {
+        let pcapng_reader = PcapNgReader::new(file_in).unwrap();
+    }
+}
+
+fn link_dump(file_in:&std::fs::File, extension:&str) {
+    if extension.eq("pcap") {
+        let pcap_reader = PcapReader::new(file_in).unwrap();
+        pcap_functions::link_dump(pcap_reader);
+    } else if extension.eq("pcapng") {
+        let pcapng_reader = PcapNgReader::new(file_in).unwrap();
+
+    }
+}
 /** 
  * Retrieves the extension of the file found 
  */

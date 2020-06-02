@@ -90,6 +90,29 @@ pub fn get_link_data (packet: &Packet) -> std::option::Option<etherparse::Ethern
 }
 
 /**
+ * Link layer dump
+ */
+
+pub fn link_dump (reader: PcapReader<&std::fs::File>) {
+    for pcap in reader{
+        let pcap = pcap.unwrap();
+        let link_data = get_link_data(&pcap);
+        println!("{:?}", link_data); 
+    }
+}
+
+/**
+ * Dumps all IP packets
+ */
+pub fn ip_dump(reader: PcapReader<&std::fs::File>) {
+    for pcap in reader {
+        let pcap = pcap.unwrap();
+        let ip_data = get_ip_data(&pcap).unwrap();
+        println!("{:?}", ip_data);
+    }
+}
+
+/**
  * Gathers metadata regarding the ip layer of the packet
  */
 pub fn ip_metadata(reader: PcapReader<&std::fs::File>) -> std::option::Option<IpMetadata> {
@@ -191,7 +214,6 @@ pub fn transport_metadata(reader: PcapReader<&std::fs::File>) {
     }
     println!("{:?}", transport_meta);
 }
-
 fn type_of<T>(_:T) -> &'static str{
     return type_name::<T>()
 }
